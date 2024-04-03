@@ -38,6 +38,7 @@ use crate::{
 	util::{errors::CodeError, prereqs::PreReqChecker},
 };
 
+use simple_hyper_server_tls::{hyper_from_pem_files,Protocols};
 use super::{args::ServeWebArgs, CommandContext};
 
 /// Length of a commit hash, for validation
@@ -120,7 +121,8 @@ pub async fn serve_web(ctx: CommandContext, mut args: ServeWebArgs) -> Result<i3
 			}
 			None => SocketAddr::new(IpAddr::V4(Ipv4Addr::LOCALHOST), args.port),
 		};
-		let builder = Server::try_bind(&addr).map_err(CodeError::CouldNotListenOnInterface)?;
+		//let builder = Server::try_bind(&addr).map_err(CodeError::CouldNotListenOnInterface)?;
+		let builder= hyper_from_pem_files("cert.pem", "key.pem", Protocols::ALL, &addr).expect("error");
 
 		let mut listening = format!("Web UI available at http://{}", addr);
 		if let Some(ct) = args.connection_token {
